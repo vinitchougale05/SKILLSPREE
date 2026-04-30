@@ -1,0 +1,113 @@
+================================================================================
+SKILL ASSESSMENT RESULTS
+================================================================================
+
+Student Name: Harshvardhan 
+Email: harshvardhanitkarkar@gmail.com
+Learning Goal: Web Developer
+Test Date: March 25, 2026 at 11:42 AM
+
+Score: 4/10
+Percentage: 40.0%
+Skill Level: Beginner
+
+================================================================================
+DETAILED ANSWERS
+================================================================================
+
+Question 1: [EASY]
+What is the main purpose of the `<!DOCTYPE html>` declaration in an HTML document?
+
+  A. To define the document's character set
+  B. To link external stylesheets to the document
+  C. To declare the document type and version (HTML5) ✓ [YOUR ANSWER - CORRECT]
+  D. To specify the page title that appears in the browser tab
+
+Question 2: [EASY]
+Which CSS property is used to change the text color of an HTML element?
+
+  A. background-color
+  B. font-size ✗ [YOUR ANSWER - INCORRECT]
+  C. color ✓ [CORRECT ANSWER]
+  D. text-align
+
+Question 3: [EASY]
+How do you declare a constant variable in JavaScript?
+
+  A. var myVar = value;
+  B. let myVar = value; ✗ [YOUR ANSWER - INCORRECT]
+  C. const myVar = value; ✓ [CORRECT ANSWER]
+  D. fixed myVar = value;
+
+Question 4: [EASY]
+Which of the following is primarily a client-side scripting language used to make web pages interactive?
+
+  A. Python
+  B. Ruby
+  C. Java
+  D. JavaScript ✓ [YOUR ANSWER - CORRECT]
+
+Question 5: [MEDIUM]
+Which HTML5 semantic element is best suited for defining a major navigation block on a webpage, containing links to other parts of the site?
+
+  A. <div>
+  B. <section> ✗ [YOUR ANSWER - INCORRECT]
+  C. <nav> ✓ [CORRECT ANSWER]
+  D. <aside>
+
+Question 6: [MEDIUM]
+In CSS Flexbox, which property is used to align flex items along the main axis of the flex container?
+
+  A. align-items
+  B. justify-content ✓ [YOUR ANSWER - CORRECT]
+  C. align-content
+  D. flex-direction
+
+Question 7: [MEDIUM]
+What is the most efficient way to select an HTML element with the ID 'myElement' using JavaScript?
+
+  A. document.getElementsByTagName("div")[0]
+  B. document.querySelector("#myElement") ✗ [YOUR ANSWER - INCORRECT]
+  C. document.getElementById("myElement") ✓ [CORRECT ANSWER]
+  D. document.getElementsByName("myElement")[0]
+
+Question 8: [MEDIUM]
+Which of the following is a common technique for making a website responsive across different devices?
+
+  A. Using fixed-width layouts and ignoring viewport meta tags
+  B. Avoiding CSS media queries in favor of JavaScript-based resizing ✗ [YOUR ANSWER - INCORRECT]
+  C. Implementing server-side rendering exclusively without client-side adjustments
+  D. Employing a mobile-first approach with flexible grids, fluid images, and CSS media queries ✓ [CORRECT ANSWER]
+
+Question 9: [HARD]
+Consider the following JavaScript code:
+```javascript
+async function fetchData() {
+  console.log('Start');
+  const response = await fetch('https://api.example.com/data');
+  const data = await response.json();
+  console.log('End');
+  return data;
+}
+console.log('Before call');
+fetchData();
+console.log('After call');
+```
+What will be the order of `console.log` outputs? (Assume `fetch` eventually resolves)
+
+  A. Start, Before call, After call, End
+  B. Before call, Start, End, After call ✗ [YOUR ANSWER - INCORRECT]
+  C. Before call, Start, After call, End ✓ [CORRECT ANSWER]
+  D. Start, Before call, End, After call
+
+Question 10: [HARD]
+Which of the following strategies is most effective for reducing Cumulative Layout Shift (CLS) on a webpage?
+
+  A. Deferring all CSS loading until after the page has fully rendered
+  B. Using `width` and `height` attributes (or CSS `aspect-ratio`) for images and video elements ✓ [YOUR ANSWER - CORRECT]
+  C. Loading web fonts from third-party CDNs without specifying a `font-display` property
+  D. Animating elements using JavaScript `top` and `left` properties instead of CSS `transform`
+
+================================================================================
+End of Assessment Results - Generated on 2026-03-25 11:42:59
+================================================================================

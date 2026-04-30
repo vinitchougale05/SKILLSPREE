@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}All Certificates - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active">All Certificates</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-certificate"></i> All Student Certificates</h2>
+            <p class="text-muted">View and manage all issued certificates across the platform</p>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-certificate fa-2x mb-2"></i>
+                    <h3>{{ total_certificates }}</h3>
+                    <p class="mb-0">Total Certificates</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h3>{{ users_with_certs }}</h3>
+                    <p class="mb-0">Students with Certificates</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-percentage fa-2x mb-2"></i>
+                    <h3>{{ ((users_with_certs / total_users * 100) if total_users > 0 else 0)|round(1) }}%</h3>
+                    <p class="mb-0">Certification Rate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-chart-pie fa-2x mb-2"></i>
+                    <h3>{{ unique_goals|length }}</h3>
+                    <p class="mb-0">Learning Goals</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-filter"></i> Filters</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="filterUser">Filter by Student:</label>
+                            <input type="text" id="filterUser" class="form-control" placeholder="Search by name or email...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterGoal">Filter by Learning Goal:</label>
+                            <select id="filterGoal" class="form-control">
+                                <option value="">All Goals</option>
+                                {% for goal in unique_goals %}
+                                <option value="{{ goal }}">{{ goal }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterCourse">Filter by Course:</label>
+                            <input type="text" id="filterCourse" class="form-control" placeholder="Search by course title...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificates Table -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-list"></i> All Issued Certificates</h5>
+                </div>
+                <div class="card-body">
+                    {% if all_certificates %}
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="certificatesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Certificate ID</th>
+                                        <th>Student</th>
+                                        <th>Email</th>
+                                        <th>Learning Goal</th>
+                                        <th>Course</th>
+                                        <th>Issued Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cert in all_certificates %}
+                                    <tr class="cert-row" 
+                                        data-user="{{ cert.user_name|lower }} {{ cert.user_email|lower }}" 
+                                        data-goal="{{ cert.learning_goal }}"
+                                        data-course="{{ cert.course_title|lower }}">
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-hashtag"></i> {{ cert.certificate_id }}
+                                            </span>
+                                        </td>
+                                        <td>{{ cert.user_name }}</td>
+                                        <td>{{ cert.user_email }}</td>
+                                        <td><span class="badge bg-info">{{ cert.learning_goal }}</span></td>
+                                        <td>{{ cert.course_title }}</td>
+                                        <td>{{ cert.issued_date_formatted }}</td>
+                                        <td>
+                                            <a href="{{ url_for('admin_view_certificate', user_id=cert.user_id, certificate_id=cert.certificate_id) }}" 
+                                               class="btn btn-sm btn-success" 
+                                               target="_blank"
+                                               title="View Certificate PDF">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <button class="btn btn-sm btn-primary view-details-btn" 
+                                                    data-cert-index="{{ loop.index0 }}"
+                                                    title="View Details">
+                                                <i class="fas fa-info-circle"></i> Details
+                                            </button>
+                                            <button class="btn btn-sm btn-danger revoke-cert-btn" 
+                                                    data-cert-index="{{ loop.index0 }}"
+                                                    data-cert-id="{{ cert.certificate_id }}"
+                                                    data-user-id="{{ cert.user_id }}"
+                                                    data-user-name="{{ cert.user_name }}"
+                                                    data-course-title="{{ cert.course_title }}"
+                                                    title="Revoke Certificate">
+                                                <i class="fas fa-ban"></i> Revoke
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-certificate fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">No certificates have been issued yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Statistics by Learning Goal -->
+    {% if all_certificates %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-chart-bar"></i> Certificates by Learning Goal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% set goal_counts = {} %}
+                        {% for cert in all_certificates %}
+                            {% set goal = cert.learning_goal %}
+                            {% if goal_counts.update({goal: goal_counts.get(goal, 0) + 1}) %}{% endif %}
+                        {% endfor %}
+                        
+                        {% for goal, count in goal_counts.items() %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ goal }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="h4 mb-0">{{ count }}</span>
+                                        <span class="badge bg-info">{{ ((count / total_certificates * 100) if total_certificates > 0 else 0)|round(1) }}%</span>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 5px;">
+                                        <div class="progress-bar bg-info" 
+                                             style="width: {{ ((count / total_certificates * 100) if total_certificates > 0 else 0) }}%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Certificate Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="detailsModalLabel">
+                    <i class="fas fa-certificate"></i> Certificate Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="viewPdfBtn" class="btn btn-success" target="_blank">
+                    <i class="fas fa-file-pdf"></i> View Certificate PDF
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revoke Certificate Confirmation Modal -->
+<div class="modal fade" id="revokeModal" tabindex="-1" aria-labelledby="revokeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="revokeModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Revoke Certificate
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> This action cannot be undone!
+                </div>
+                <p>Are you sure you want to revoke this certificate?</p>
+                <div id="revokeDetails">
+                    <!-- Details will be filled dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmRevokeBtn">
+                    <i class="fas fa-ban"></i> Yes, Revoke Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allCertificates = {{ all_certificates|tojson|safe }};
+
+    // Filter functionality
+    document.getElementById('filterUser').addEventListener('input', filterCertificates);
+    document.getElementById('filterGoal').addEventListener('change', filterCertificates);
+    document.getElementById('filterCourse').addEventListener('input', filterCertificates);
+
+    function filterCertificates() {
+        const userFilter = document.getElementById('filterUser').value.toLowerCase();
+        const goalFilter = document.getElementById('filterGoal').value;
+        const courseFilter = document.getElementById('filterCourse').value.toLowerCase();
+
+        const rows = document.querySelectorAll('.cert-row');
+        rows.forEach(row => {
+            const userData = row.getAttribute('data-user');
+            const goalData = row.getAttribute('data-goal');
+            const courseData = row.getAttribute('data-course');
+
+            const matchUser = !userFilter || userData.includes(userFilter);
+            const matchGoal = !goalFilter || goalData === goalFilter;
+            const matchCourse = !courseFilter || courseData.includes(courseFilter);
+
+            if (matchUser && matchGoal && matchCourse) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // View Details functionality
+    document.querySelectorAll('.view-details-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = this.getAttribute('data-cert-index');
+            const cert = allCertificates[index];
+            
+            const html = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-hashtag"></i> Certificate Information</h6>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Certificate ID:</th>
+                                <td><span class="badge bg-warning text-dark">${cert.certificate_id}</span></td>
+                            </tr>
+                            <tr>
+                                <th>Issued Date:</th>
+                                <td>${cert.issued_date_formatted}</td>
+                            </tr>
+                            <tr>
+                                <th>Course:</th>
+                                <td>${cert.course_title}</td>
+                            </tr>
+                            <tr>
+                                <th>Learning Goal:</th>
+                                <td><span class="badge bg-info">${cert.learning_goal}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user"></i> Student Information</h6>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Student Name:</th>
+                                <td>${cert.user_name}</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>${cert.user_email}</td>
+                            </tr>
+                            <tr>
+                                <th>User ID:</th>
+                                <td><code>${cert.user_id}</code></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle"></i> This certificate was issued after the student successfully completed 
+                    <strong>${cert.course_title}</strong> for their learning goal: <strong>${cert.learning_goal}</strong>.
+                </div>
+            `;
+
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('viewPdfBtn').href = `/admin/view-certificate/${cert.user_id}/${cert.certificate_id}`;
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        });
+    });
+
+    // Revoke Certificate functionality
+    let revokeUserId, revokeCertId;
+
+    document.querySelectorAll('.revoke-cert-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            revokeUserId = this.getAttribute('data-user-id');
+            revokeCertId = this.getAttribute('data-cert-id');
+            const userName = this.getAttribute('data-user-name');
+            const courseTitle = this.getAttribute('data-course-title');
+            
+            const detailsHtml = `
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Student:</th>
+                        <td>${userName}</td>
+                    </tr>
+                    <tr>
+                        <th>Course:</th>
+                        <td>${courseTitle}</td>
+                    </tr>
+                    <tr>
+                        <th>Certificate ID:</th>
+                        <td><span class="badge bg-warning text-dark">${revokeCertId}</span></td>
+                    </tr>
+                </table>
+            `;
+            
+            document.getElementById('revokeDetails').innerHTML = detailsHtml;
+            new bootstrap.Modal(document.getElementById('revokeModal')).show();
+        });
+    });
+
+    // Confirm revoke action
+    document.getElementById('confirmRevokeBtn').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Revoking...';
+        
+        fetch('/admin/revoke-certificate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: revokeUserId,
+                certificate_id: revokeCertId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('revokeModal')).hide();
+                
+                // Show success message
+                alert('Certificate revoked successfully!');
+                
+                // Reload page to refresh the list
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-ban"></i> Yes, Revoke Certificate';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while revoking the certificate.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-ban"></i> Yes, Revoke Certificate';
+        });
+    });
+</script>
+{% endblock %}

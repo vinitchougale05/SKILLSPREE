@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-users"></i> User Management</h2>
+            <p class="text-muted">Manage all registered users on the platform</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-list"></i> All Users</h5>
+                    <div>
+                        <input type="text" class="form-control" id="searchUsers" placeholder="Search users...">
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Learning Goal</th>
+                                        <th>Skill Level</th>
+                                        <th>Courses</th>
+                                        <th>Certificates</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    {{ user.name[0].upper() }}
+                                                </div>
+                                                {{ user.name }}
+                                            </div>
+                                        </td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            {% if user.learning_goal %}
+                                                <span class="badge bg-primary">{{ user.learning_goal }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Not Set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if user.skill_level %}
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar" data-width="{{ user.skill_level }}">
+                                                        {{ user.skill_level|round }}%
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">Not assessed</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ user.courses|length if user.courses else 0 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">{{ user.certificates|length if user.certificates else 0 }}</span>
+                                        </td>
+                                        <td>
+                                            {% if user.created_at is defined and user.created_at and user.created_at.strftime is defined %}
+                                                {{ user.created_at.strftime('%m/%d/%Y') }}
+                                            {% elif user.created_at is defined and user.created_at %}
+                                                {{ user.created_at }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
+                                                <button class="btn btn-outline-primary btn-sm btn-view" data-user-id="{{ user._id }}" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning btn-sm btn-edit" data-user-id="{{ user._id }}" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-sm btn-delete" data-user-id="{{ user._id }}" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5>No users found</h5>
+                            <p class="text-muted">No users have registered yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize progress bar widths from data attributes
+    document.querySelectorAll('.progress .progress-bar[data-width]').forEach(bar => {
+        const val = parseFloat(bar.getAttribute('data-width') || '0');
+        const clamped = Math.max(0, Math.min(100, val));
+        bar.style.width = `${clamped}%`;
+    });
+
+    const usersTable = document.getElementById('usersTable');
+    if (usersTable) {
+        // Delegated click handlers
+        usersTable.addEventListener('click', async (e) => {
+            const viewBtn = e.target.closest('.btn-view');
+            const editBtn = e.target.closest('.btn-edit');
+            const deleteBtn = e.target.closest('.btn-delete');
+
+            if (viewBtn) {
+                const userId = viewBtn.getAttribute('data-user-id');
+                await handleView(userId);
+            } else if (editBtn) {
+                const userId = editBtn.getAttribute('data-user-id');
+                await openEditModal(userId);
+            } else if (deleteBtn) {
+                const userId = deleteBtn.getAttribute('data-user-id');
+                await handleDelete(userId, deleteBtn);
+            }
+        });
+    }
+
+    async function handleView(userId) {
+        try {
+            const res = await fetch(`/admin/users/${userId}`);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Failed to fetch');
+            const u = data.user;
+            const html = `
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Name:</strong> ${escapeHtml(u.name || '-')}</li>
+                    <li class="list-group-item"><strong>Email:</strong> ${escapeHtml(u.email || '-')}</li>
+                    <li class="list-group-item"><strong>Learning Goal:</strong> ${escapeHtml(u.learning_goal || '-')}</li>
+                    <li class="list-group-item"><strong>Skill Level:</strong> ${u.skill_level ?? 0}%</li>
+                    <li class="list-group-item"><strong>Courses:</strong> ${u.courses_count}</li>
+                    <li class="list-group-item"><strong>Certificates:</strong> ${u.certificates_count}</li>
+                    <li class="list-group-item"><strong>Joined:</strong> ${escapeHtml(u.created_at || '-')}</li>
+                    <li class="list-group-item"><strong>Admin:</strong> ${u.is_admin ? 'Yes' : 'No'}</li>
+                </ul>`;
+            showModal('User Details', html, [{label:'Close', class:'btn-secondary'}]);
+        } catch (err) {
+            showToast(err.message || 'Error loading user details', 'danger');
+        }
+    }
+
+    async function openEditModal(userId) {
+        try {
+            const res = await fetch(`/admin/users/${userId}`);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Failed to fetch');
+            const u = data.user;
+            const form = document.createElement('form');
+            form.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input class="form-control" name="name" value="${escapeAttr(u.name || '')}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" name="email" value="${escapeAttr(u.email || '')}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Learning Goal</label>
+                    <input class="form-control" name="learning_goal" value="${escapeAttr(u.learning_goal || '')}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Skill Level (0-100)</label>
+                    <input type="number" step="0.1" min="0" max="100" class="form-control" name="skill_level" value="${Number(u.skill_level || 0)}">
+                </div>
+            `;
+            showModal('Edit User', form, [
+                {label:'Cancel', class:'btn-secondary'},
+                {
+                    label:'Save Changes', class:'btn-primary', onClick: async (modalEl) => {
+                        const formData = new FormData(form);
+                        const payload = Object.fromEntries(formData.entries());
+                        const resp = await fetch(`/admin/users/${userId}/edit`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(payload)
+                        });
+                        const out = await resp.json();
+                        if (!out.success) {
+                            showToast(out.message || 'Update failed', 'danger');
+                            return false; // keep modal open
+                        }
+                        showToast('User updated', 'success');
+                        // Simple approach: reload to reflect changes
+                        window.location.reload();
+                        return true;
+                    }
+                }
+            ]);
+        } catch (err) {
+            showToast(err.message || 'Error loading user for edit', 'danger');
+        }
+    }
+
+    async function handleDelete(userId, btn) {
+        if (!confirm('Are you sure you want to delete this user? This cannot be undone.')) return;
+        try {
+            const resp = await fetch(`/admin/users/${userId}/delete`, { method: 'POST' });
+            const out = await resp.json();
+            if (!out.success) throw new Error(out.message || 'Delete failed');
+            showToast('User deleted', 'success');
+            // Remove row from table
+            const row = btn.closest('tr');
+            if (row) row.remove();
+        } catch (err) {
+            showToast(err.message || 'Error deleting user', 'danger');
+        }
+    }
+
+    // Lightweight modal helper using Bootstrap 5
+    function showModal(title, bodyContent, actions = []) {
+        let modalEl = document.getElementById('dynamicModal');
+        if (!modalEl) {
+            modalEl = document.createElement('div');
+            modalEl.id = 'dynamicModal';
+            modalEl.className = 'modal fade';
+            modalEl.tabIndex = -1;
+            modalEl.innerHTML = `
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title"></h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer"></div>
+                  </div>
+                </div>`;
+            document.body.appendChild(modalEl);
+        }
+        modalEl.querySelector('.modal-title').textContent = title;
+        const body = modalEl.querySelector('.modal-body');
+        if (typeof bodyContent === 'string') {
+            body.innerHTML = bodyContent;
+        } else if (bodyContent instanceof HTMLElement) {
+            body.innerHTML = '';
+            body.appendChild(bodyContent);
+        }
+        const footer = modalEl.querySelector('.modal-footer');
+        footer.innerHTML = '';
+        actions.forEach(a => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `btn ${a.class || 'btn-secondary'}`;
+            btn.textContent = a.label || 'Close';
+            btn.addEventListener('click', async () => {
+                if (typeof a.onClick === 'function') {
+                    const shouldClose = await a.onClick(modalEl);
+                    if (shouldClose === false) return;
+                }
+                bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            });
+            footer.appendChild(btn);
+        });
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    function showToast(message, type = 'info') {
+        // Basic inline toast using Bootstrap alert style appended to body
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+        toast.style.zIndex = 2000;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+    function escapeAttr(str) {
+        return String(str).replace(/"/g, '&quot;');
+    }
+
+    // Simple search functionality
+    const searchInput = document.getElementById('searchUsers');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#usersTable tbody tr');
+
+            tableRows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const goal = row.cells[2].textContent.toLowerCase();
+
+                if (name.includes(searchTerm) || email.includes(searchTerm) || goal.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

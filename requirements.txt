@@ -1,0 +1,6 @@
+# All work well with Python 3.8-3.11
+Flask>=2.0.0
+flask-pymongo>=2.3.0
+bcrypt>=3.2.0
+reportlab>=3.6.0
+pymongo>=4.0.0

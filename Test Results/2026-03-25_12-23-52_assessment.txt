@@ -1,0 +1,100 @@
+================================================================================
+SKILL ASSESSMENT RESULTS
+================================================================================
+
+Student Name: aditya
+Email: aditya@gmail.com
+Learning Goal: Web Developer
+Test Date: March 25, 2026 at 12:23 PM
+
+Score: 2/10
+Percentage: 20.0%
+Skill Level: Beginner
+
+================================================================================
+DETAILED ANSWERS
+================================================================================
+
+Question 1: [EASY]
+What is the primary purpose of HTML in web development?
+
+  A. To style the visual appearance of web pages. ✗ [YOUR ANSWER - INCORRECT]
+  B. To add interactivity and dynamic behavior to web pages.
+  C. To structure the content and define the elements of web pages. ✓ [CORRECT ANSWER]
+  D. To manage server-side logic and database interactions.
+
+Question 2: [EASY]
+Which CSS property is used to change the text color of an element?
+
+  A. `background-color` ✗ [YOUR ANSWER - INCORRECT]
+  B. `font-color`
+  C. `color` ✓ [CORRECT ANSWER]
+  D. `text-style`
+
+Question 3: [EASY]
+What is JavaScript primarily used for in web development?
+
+  A. Defining the structure and content of a web page.
+  B. Styling the appearance of web pages.
+  C. Adding interactivity and dynamic behavior to web pages. ✓ [CORRECT ANSWER]
+  D. Managing server-side databases. ✗ [YOUR ANSWER - INCORRECT]
+
+Question 4: [MEDIUM]
+How do you select an element with the ID 'myElement' using plain JavaScript?
+
+  A. `document.selectById('myElement')`
+  B. `document.getElement('myElement')` ✗ [YOUR ANSWER - INCORRECT]
+  C. `document.getElementById('myElement')` ✓ [CORRECT ANSWER]
+  D. `document.query('#myElement')`
+
+Question 5: [MEDIUM]
+Which CSS property is used to create a flexible container that allows items to be arranged in rows or columns, and provides powerful alignment capabilities?
+
+  A. `display: block;` ✗ [YOUR ANSWER - INCORRECT]
+  B. `display: inline;`
+  C. `display: flex;` ✓ [CORRECT ANSWER]
+  D. `display: grid-item;`
+
+Question 6: [MEDIUM]
+Which HTTP method is typically used to retrieve data from a server without modifying it?
+
+  A. `POST` ✗ [YOUR ANSWER - INCORRECT]
+  B. `PUT`
+  C. `GET` ✓ [CORRECT ANSWER]
+  D. `DELETE`
+
+Question 7: [MEDIUM]
+What is the main difference between `localStorage` and `sessionStorage` in web browsers?
+
+  A. `localStorage` is for server-side data, `sessionStorage` is for client-side data. ✗ [YOUR ANSWER - INCORRECT]
+  B. Data in `localStorage` persists even after the browser is closed, while `sessionStorage` data is cleared when the session ends. ✓ [CORRECT ANSWER]
+  C. `sessionStorage` can store more data than `localStorage`.
+  D. `localStorage` is accessible across different browser tabs, `sessionStorage` is not.
+
+Question 8: [HARD]
+What is the primary benefit of using `async`/`await` in JavaScript for handling asynchronous operations compared to traditional callbacks or `.then()` chains?
+
+  A. It makes asynchronous code execute synchronously, preventing blocking operations. ✗ [YOUR ANSWER - INCORRECT]
+  B. It allows writing asynchronous code that looks and behaves more like synchronous code, improving readability and error handling. ✓ [CORRECT ANSWER]
+  C. It automatically retries failed API requests without explicit code.
+  D. It guarantees that all asynchronous operations will complete in a specific, predefined order regardless of their actual completion time.
+
+Question 9: [HARD]
+Which of the following is a common and effective technique to optimize the loading speed of images on a website, especially for users with slower connections or mobile devices?
+
+  A. Always serving the highest resolution image available regardless of screen size.
+  B. Using a single, large image sprite for all icons and graphics.
+  C. Implementing lazy loading for images that are below the fold and serving responsive images (`srcset`/`sizes`). ✓ [YOUR ANSWER - CORRECT]
+  D. Embedding all images directly into the HTML using base64 encoding.
+
+Question 10: [HARD]
+A frontend application running on `https://app.example.com` tries to make an API request to `https://api.example.com`. The browser console shows a 'CORS error'. Which of the following is the most likely cause and common solution?
+
+  A. The frontend application needs to send a specific `Origin` header, and the backend needs to validate it.
+  B. The backend server at `https://api.example.com` is not sending the `Access-Control-Allow-Origin` header with `https://app.example.com` (or `*`) in its response. ✓ [YOUR ANSWER - CORRECT]
+  C. The frontend application is using `GET` request, but the backend only accepts `POST` requests.
+  D. The SSL certificates for `https://app.example.com` and `https://api.example.com` are mismatched.
+
+================================================================================
+End of Assessment Results - Generated on 2026-03-25 12:23:52
+================================================================================

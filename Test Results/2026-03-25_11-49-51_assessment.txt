@@ -1,0 +1,119 @@
+================================================================================
+SKILL ASSESSMENT RESULTS
+================================================================================
+
+Student Name: harshu
+Email: harshu@gmail.com
+Learning Goal: Web Developer
+Test Date: March 25, 2026 at 11:49 AM
+
+Score: 3/10
+Percentage: 30.0%
+Skill Level: Beginner
+
+================================================================================
+DETAILED ANSWERS
+================================================================================
+
+Question 1: [EASY]
+Which HTML tag is used to create a hyperlink?
+
+  A. <link>
+  B. <a> ✓ [CORRECT ANSWER]
+  C. <href> ✗ [YOUR ANSWER - INCORRECT]
+  D. <url>
+
+Question 2: [EASY]
+Which CSS property is used to change the text color of an element?
+
+  A. background-color ✗ [YOUR ANSWER - INCORRECT]
+  B. font-color
+  C. color ✓ [CORRECT ANSWER]
+  D. text-style
+
+Question 3: [EASY]
+How do you declare a constant variable in JavaScript?
+
+  A. var myConst = 10;
+  B. let myConst = 10; ✗ [YOUR ANSWER - INCORRECT]
+  C. const myConst = 10; ✓ [CORRECT ANSWER]
+  D. constant myConst = 10;
+
+Question 4: [EASY]
+What does CSS stand for?
+
+  A. Creative Style Sheets
+  B. Computer Style Sheets ✗ [YOUR ANSWER - INCORRECT]
+  C. Cascading Style Sheets ✓ [CORRECT ANSWER]
+  D. Colorful Style Sheets
+
+Question 5: [MEDIUM]
+In the CSS Box Model, what is the correct order of elements from the innermost to the outermost?
+
+  A. Content, Margin, Padding, Border
+  B. Content, Border, Padding, Margin
+  C. Content, Padding, Border, Margin ✓ [YOUR ANSWER - CORRECT]
+  D. Padding, Content, Border, Margin
+
+Question 6: [MEDIUM]
+Which JavaScript method is used to select the first element in the document that matches a specified CSS selector?
+
+  A. document.getElementsByClassName()
+  B. document.querySelectorAll()
+  C. document.getElementById()
+  D. document.querySelector() ✓ [YOUR ANSWER - CORRECT]
+
+Question 7: [MEDIUM]
+Which HTTP method is typically used to retrieve data from a server without modifying it?
+
+  A. POST
+  B. PUT
+  C. GET ✓ [CORRECT ANSWER]
+  D. DELETE ✗ [YOUR ANSWER - INCORRECT]
+
+Question 8: [MEDIUM]
+In React, what is JSX?
+
+  A. A JavaScript library for routing.
+  B. A syntax extension for JavaScript that looks like HTML. ✓ [YOUR ANSWER - CORRECT]
+  C. A build tool for compiling React applications.
+  D. A method for managing state in functional components.
+
+Question 9: [HARD]
+Which technique helps reduce the initial load time of a web page by only loading critical CSS necessary for the content visible in the user's viewport, deferring the rest?
+
+  A. CSS Reset
+  B. Critical CSS ✓ [CORRECT ANSWER]
+  C. CSS Grid Layout
+  D. CSS Modules ✗ [YOUR ANSWER - INCORRECT]
+
+Question 10: [HARD]
+Consider the following JavaScript code:
+```javascript
+function createCounter() {
+  let count = 0;
+  return {
+    increment: function() {
+      count++;
+      return count;
+    },
+    decrement: function() {
+      count--;
+      return count;
+    }
+  };
+}
+const counter = createCounter();
+console.log(counter.increment());
+console.log(counter.increment());
+```
+What will be the output of this code?
+
+  A. 1, 1 ✗ [YOUR ANSWER - INCORRECT]
+  B. 0, 1
+  C. 1, 2 ✓ [CORRECT ANSWER]
+  D. Undefined, Undefined
+
+================================================================================
+End of Assessment Results - Generated on 2026-03-25 11:49:51
+================================================================================

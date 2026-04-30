@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}All Test Results - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active">All Test Results</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-clipboard-list"></i> All Student Test Results</h2>
+            <p class="text-muted">View and analyze all assessments across the platform</p>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-check fa-2x mb-2"></i>
+                    <h3>{{ total_tests }}</h3>
+                    <p class="mb-0">Total Tests</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h3>{{ all_test_results|selectattr('level', 'equalto', 'Expert')|list|length }}</h3>
+                    <p class="mb-0">Expert Level</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                    <h3>{{ ((all_test_results|map(attribute='percentage')|sum / all_test_results|length) if all_test_results else 0)|round(1) }}%</h3>
+                    <p class="mb-0">Avg Score</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-file-alt fa-2x mb-2"></i>
+                    <h3>{{ file_results|length }}</h3>
+                    <p class="mb-0">Saved Files</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-filter"></i> Filters</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="filterUser">Filter by User:</label>
+                            <input type="text" id="filterUser" class="form-control" placeholder="Search by name or email...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterGoal">Filter by Learning Goal:</label>
+                            <select id="filterGoal" class="form-control">
+                                <option value="">All Goals</option>
+                                {% set goals = all_test_results|map(attribute='learning_goal')|unique|list %}
+                                {% for goal in goals %}
+                                <option value="{{ goal }}">{{ goal }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterLevel">Filter by Level:</label>
+                            <select id="filterLevel" class="form-control">
+                                <option value="">All Levels</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Results Table -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-table"></i> All Assessment Results</h5>
+                </div>
+                <div class="card-body">
+                    {% if all_test_results %}
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student</th>
+                                        <th>Email</th>
+                                        <th>Learning Goal</th>
+                                        <th>Score</th>
+                                        <th>Percentage</th>
+                                        <th>Level</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in all_test_results %}
+                                    <tr class="test-row" data-user="{{ result.user_name|lower }} {{ result.user_email|lower }}" data-goal="{{ result.learning_goal }}" data-level="{{ result.level }}">
+                                        <td>{{ result.date_formatted }}</td>
+                                        <td>{{ result.user_name }}</td>
+                                        <td>{{ result.user_email }}</td>
+                                        <td><span class="badge bg-info">{{ result.learning_goal }}</span></td>
+                                        <td>{{ result.score }}/{{ result.total }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-{{ 'success' if result.percentage >= 80 else ('warning' if result.percentage >= 60 else 'secondary') }}" 
+                                                     style="width: {{ result.percentage }}%">
+                                                    {{ result.percentage|round(1) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if result.level == 'Expert' else ('primary' if result.level == 'Advanced' else ('warning' if result.level == 'Intermediate' else 'secondary')) }}">
+                                                {{ result.level }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary view-details-btn" 
+                                                    data-result-index="{{ loop.index0 }}">
+                                                <i class="fas fa-eye"></i> View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">No test results available yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Test Files -->
+    {% if file_results %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-file-download"></i> Saved Test Result Files</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Filename</th>
+                                    <th>Date</th>
+                                    <th>Size</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in file_results %}
+                                <tr>
+                                    <td><i class="fas fa-file-alt text-primary"></i> {{ file.filename }}</td>
+                                    <td>{{ file.date }}</td>
+                                    <td>{{ file.size }}</td>
+                                    <td>
+                                        <a href="{{ url_for('view_test_result', filename=file.filename) }}" 
+                                           class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- View Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Test Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allTestResults = {{ all_test_results|tojson|safe }};
+
+    // Filter functionality
+    document.getElementById('filterUser').addEventListener('input', filterResults);
+    document.getElementById('filterGoal').addEventListener('change', filterResults);
+    document.getElementById('filterLevel').addEventListener('change', filterResults);
+
+    function filterResults() {
+        const userFilter = document.getElementById('filterUser').value.toLowerCase();
+        const goalFilter = document.getElementById('filterGoal').value;
+        const levelFilter = document.getElementById('filterLevel').value;
+
+        const rows = document.querySelectorAll('.test-row');
+        rows.forEach(row => {
+            const userData = row.getAttribute('data-user');
+            const goalData = row.getAttribute('data-goal');
+            const levelData = row.getAttribute('data-level');
+
+            const matchUser = !userFilter || userData.includes(userFilter);
+            const matchGoal = !goalFilter || goalData === goalFilter;
+            const matchLevel = !levelFilter || levelData === levelFilter;
+
+            if (matchUser && matchGoal && matchLevel) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // View Details functionality
+    document.querySelectorAll('.view-details-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = this.getAttribute('data-result-index');
+            const result = allTestResults[index];
+            
+            let html = `
+                <div class="mb-3">
+                    <h6><strong>Student:</strong> ${result.user_name} (${result.user_email})</h6>
+                    <p class="mb-1"><strong>Learning Goal:</strong> <span class="badge bg-info">${result.learning_goal}</span></p>
+                    <p class="mb-1"><strong>Date:</strong> ${result.date_formatted}</p>
+                    <p class="mb-1"><strong>Score:</strong> ${result.score}/${result.total} (${result.percentage.toFixed(1)}%)</p>
+                    <p class="mb-1"><strong>Level:</strong> <span class="badge bg-success">${result.level}</span></p>
+                </div>
+                <hr>
+            `;
+
+            if (result.detailed_results && result.detailed_results.length > 0) {
+                html += '<h6 class="mb-3">Detailed Answers:</h6>';
+                result.detailed_results.forEach((item, idx) => {
+                    const isCorrect = item.is_correct;
+                    const cardBorder = isCorrect ? 'border-success' : 'border-danger';
+                    const cardHeader = isCorrect ? 'bg-success text-white' : 'bg-danger text-white';
+                    
+                    html += `
+                        <div class="card mb-3 ${cardBorder}">
+                            <div class="card-header ${cardHeader}">
+                                <strong>Question ${idx + 1}:</strong> ${item.question}
+                                ${item.difficulty ? `<span class="badge bg-light text-dark float-end">${item.difficulty}</span>` : ''}
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                    `;
+                    
+                    item.options.forEach((option, optIdx) => {
+                        const isUserAnswer = optIdx === item.user_answer;
+                        const isCorrectAnswer = optIdx === item.correct_answer;
+                        let optionClass = '';
+                        let optionIcon = '';
+                        
+                        if (isUserAnswer && isCorrect) {
+                            optionClass = 'list-group-item-success';
+                            optionIcon = '<i class="fas fa-check-circle text-success"></i>';
+                        } else if (isUserAnswer && !isCorrect) {
+                            optionClass = 'list-group-item-danger';
+                            optionIcon = '<i class="fas fa-times-circle text-danger"></i>';
+                        } else if (isCorrectAnswer && !isCorrect) {
+                            optionClass = 'list-group-item-success border border-success';
+                            optionIcon = '<i class="fas fa-check-circle text-success"></i>';
+                        }
+                        
+                        html += `<li class="list-group-item ${optionClass}">${optionIcon} ${option}</li>`;
+                    });
+                    
+                    html += `
+                                </ul>
+                                ${!isCorrect ? `
+                                    <div class="alert alert-info mt-2 mb-0">
+                                        <small><strong>Your answer:</strong> ${item.options[item.user_answer] || 'No answer'}</small><br>
+                                        <small><strong>Correct answer:</strong> ${item.options[item.correct_answer]}</small>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p class="text-muted">Detailed results not available for this test.</p>';
+            }
+
+            document.getElementById('modalBody').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        });
+    });
+</script>
+{% endblock %}

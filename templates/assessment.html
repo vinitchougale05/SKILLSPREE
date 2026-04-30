@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Assessment - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card quiz-card">
+                <div class="card-header text-center">
+                    <h3><i class="fas fa-brain"></i> {{ learning_goal }} - Skill Assessment</h3>
+                    <p class="mb-0">Answer the following questions to determine your current skill level</p>
+                </div>
+                <div class="card-body bg-white text-dark">
+                    <form method="POST">
+                        {% for question in questions %}
+                        {% set i = loop.index0 %}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="w-100">
+                                    <h5 class="mb-2">Question {{ loop.index }}:</h5>
+                                    <div class="markdown-question">{{ question.question }}</div>
+                                </div>
+                                {% if question.get('difficulty') %}
+                                    {% if question.difficulty == 'easy' %}
+                                        <span class="badge bg-success ms-2">Easy</span>
+                                    {% elif question.difficulty == 'medium' %}
+                                        <span class="badge bg-warning text-dark ms-2">Medium</span>
+                                    {% elif question.difficulty == 'hard' %}
+                                        <span class="badge bg-danger ms-2">Hard</span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            {% for option in question.options %}
+                            {% set j = loop.index0 %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="question_{{ i }}" value="{{ j }}" id="q{{ i }}_{{ j }}">
+                                <label class="form-check-label" for="q{{ i }}_{{ j }}">
+                                    <span class="markdown-option">{{ option }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <hr>
+                        {% endfor %}
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check"></i> Submit Assessment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configure marked to handle line breaks
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
+        function renderMarkdown(el, isInline = false) {
+            var rawMarkdown = el.textContent;
+            
+            // Handle literal \n characters if they appear as text
+            rawMarkdown = rawMarkdown.replace(/\\n/g, '\n');
+            
+            if (isInline && marked.parseInline) {
+                el.innerHTML = marked.parseInline(rawMarkdown);
+            } else {
+                el.innerHTML = marked.parse(rawMarkdown);
+                // Remove wrapping p tag if it's the only child and we want inline-ish behavior
+                if (isInline && el.children.length === 1 && el.children[0].tagName === 'P') {
+                    el.innerHTML = el.children[0].innerHTML;
+                }
+            }
+
+            // Add Bootstrap styling to code blocks
+            el.querySelectorAll('pre').forEach(function(pre) {
+                pre.classList.add('bg-light', 'p-3', 'rounded', 'border', 'mt-2', 'mb-2');
+            });
+            
+            el.querySelectorAll('code').forEach(function(code) {
+                if (!code.parentElement.matches('pre')) {
+                    code.classList.add('bg-light', 'px-1', 'rounded', 'text-danger');
+                }
+            });
+        }
+
+        document.querySelectorAll('.markdown-question').forEach(function(el) {
+            renderMarkdown(el, false);
+        });
+
+        document.querySelectorAll('.markdown-option').forEach(function(el) {
+            renderMarkdown(el, true);
+        });
+    });
+</script>
+{% endblock %}

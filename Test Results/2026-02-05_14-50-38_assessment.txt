@@ -1,0 +1,110 @@
+================================================================================
+SKILL ASSESSMENT RESULTS
+================================================================================
+
+Student Name: Vinit Chougale
+Email: vinitchougale05@gmail.com
+Learning Goal: Python Developer
+Test Date: February 05, 2026 at 02:50 PM
+
+Score: 4/10
+Percentage: 40.0%
+Skill Level: Beginner
+
+================================================================================
+DETAILED ANSWERS
+================================================================================
+
+Question 1: [EASY]
+Which of the following is the correct way to assign the integer value 10 to a variable named `x` in Python?
+
+  A. int x = 10;
+  B. x = 10 ✓ [YOUR ANSWER - CORRECT]
+  C. x := 10
+  D. let x = 10
+
+Question 2: [EASY]
+What built-in function is used to determine the number of items in a list or the length of a string in Python?
+
+  A. size()
+  B. count() ✗ [YOUR ANSWER - INCORRECT]
+  C. len() ✓ [CORRECT ANSWER]
+  D. length()
+
+Question 3: [EASY]
+In Python, which keyword is used to define a function?
+
+  A. func
+  B. function
+  C. def ✓ [YOUR ANSWER - CORRECT]
+  D. define
+
+Question 4: [EASY]
+What is the correct method to add an element `item` to the end of an existing list `my_list`?
+
+  A. my_list.insert_last(item)
+  B. my_list.add(item)
+  C. my_list.append(item) ✓ [YOUR ANSWER - CORRECT]
+  D. my_list + item
+
+Question 5: [MEDIUM]
+Consider the following Python code:
+```python
+x = 10
+def foo():
+    x = 5
+    print(x)
+foo()
+print(x)
+```
+What will be the output of this code?
+
+  A. 5 then 5
+  B. 5 then 10 ✓ [CORRECT ANSWER]
+  C. 10 then 5 ✗ [YOUR ANSWER - INCORRECT]
+  D. 10 then 10
+
+Question 6: [MEDIUM]
+Which of the following list comprehensions correctly creates a new list containing the squares of all even numbers from 0 to 9?
+
+  A. [x**2 for x in range(10) if x % 2 == 0] ✓ [CORRECT ANSWER]
+  B. [x for x in range(10) if x % 2 == 0 and x**2] ✗ [YOUR ANSWER - INCORRECT]
+  C. [x**2 for x in range(10) where x % 2 == 0]
+  D. [(x*x) for x in range(10) if x % 2]
+
+Question 7: [MEDIUM]
+How would you correctly handle a `FileNotFoundError` while trying to open a file in Python, ensuring the program doesn't crash?
+
+  A. try: open("file.txt")
+except FileNotFoundError: print("File not found") ✓ [CORRECT ANSWER]
+  B. catch FileNotFoundError: open("file.txt") ✗ [YOUR ANSWER - INCORRECT]
+  C. if not file_exists("file.txt"): print("File not found")
+  D. handle FileNotFoundError for open("file.txt"): print("File not found")
+
+Question 8: [MEDIUM]
+In the context of Python classes, what is the primary purpose of the `self` parameter in instance methods?
+
+  A. It is a keyword to refer to static class variables.
+  B. It automatically refers to the class itself, allowing access to class methods.
+  C. It refers to the instance of the object on which the method was called, allowing access to its attributes and methods. ✓ [YOUR ANSWER - CORRECT]
+  D. It is a mandatory placeholder that has no functional purpose but improves readability.
+
+Question 9: [HARD]
+What is the primary advantage of using a generator function (with `yield`) instead of a regular function that returns a list, especially when dealing with potentially large sequences of data?
+
+  A. Generators are always faster to execute than functions returning lists.
+  B. Generators store the entire sequence in memory, making them easier to debug. ✗ [YOUR ANSWER - INCORRECT]
+  C. Generators produce items one by one and on-demand, consuming less memory, which is beneficial for large datasets. ✓ [CORRECT ANSWER]
+  D. Generators allow direct random access to elements within the sequence.
+
+Question 10: [HARD]
+Which of the following best describes the primary use case for Python decorators?
+
+  A. To define global variables that can be accessed from any part of the program.
+  B. To statically analyze code for errors before runtime. ✗ [YOUR ANSWER - INCORRECT]
+  C. To dynamically modify or extend the behavior of functions or methods without permanently altering their code. ✓ [CORRECT ANSWER]
+  D. To create anonymous functions for short-term operations.
+
+================================================================================
+End of Assessment Results - Generated on 2026-02-05 14:50:38
+================================================================================

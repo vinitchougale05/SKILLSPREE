@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Setup{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 720px;">
+  <div class="card">
+    <div class="card-header bg-info text-white">
+      <h4 class="mb-0"><i class="fas fa-user-shield"></i> Admin Setup</h4>
+    </div>
+    <div class="card-body">
+      {% if existing_admins == 0 %}
+        <p class="mb-3">No admin exists yet. You can promote your account to admin to complete the initial setup.</p>
+        <form method="post">
+          <button class="btn btn-primary" type="submit"><i class="fas fa-crown"></i> Make me admin</button>
+        </form>
+      {% else %}
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          An admin already exists. Please ask an existing admin to promote your account.
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

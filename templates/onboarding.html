@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Choose Your Path - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="fas fa-road"></i> Choose Your Learning Goal</h3>
+                    <p class="mb-0">What would you like to become?</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            {% for goal in goals %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card goal-card h-100" style="cursor: pointer;" onclick="selectGoal('{{ goal }}')">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-{% if 'Java' in goal %}coffee{% elif 'Python' in goal %}snake{% elif 'Web' in goal %}globe{% elif 'Data' in goal %}chart-bar{% elif 'Mobile' in goal %}mobile-alt{% elif 'DevOps' in goal %}cogs{% else %}code{% endif %} fa-3x text-primary mb-3"></i>
+                                        <h5>{{ goal }}</h5>
+                                        <input type="radio" name="learning_goal" value="{{ goal }}" id="goal_{{ loop.index }}" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="continueBtn" disabled>
+                                <i class="fas fa-arrow-right"></i> Continue to Assessment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectGoal(goal) {
+    // Remove previous selections
+    document.querySelectorAll('.goal-card').forEach(card => {
+        card.classList.remove('border-primary', 'bg-light');
+    });
+
+    // Select current goal
+    event.currentTarget.classList.add('border-primary', 'bg-light');
+    document.querySelector(`input[value="${goal}"]`).checked = true;
+    document.getElementById('continueBtn').disabled = false;
+}
+</script>
+{% endblock %}

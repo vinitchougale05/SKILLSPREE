@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            <i class="fas fa-rocket"></i> Your Learning Journey Starts Here
+        </h1>
+        <p class="lead mb-5">Discover personalized courses, track your progress, and earn certificates in your chosen field</p>
+        {% if not session.user_id %}
+            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">
+                <i class="fas fa-user-plus"></i> Get Started
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        {% else %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Why Choose Our Platform?</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0">
+                <div class="card-body text-center">
+                    <i class="fas fa-brain feature-icon mb-3"></i>
+                    <h4>Personalized Learning</h4>
+                    <p class="text-muted">AI-powered recommendations based on your goals and skill level</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line feature-icon mb-3"></i>
+                    <h4>Progress Tracking</h4>
+                    <p class="text-muted">Visual dashboards to monitor your learning journey and achievements</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0">
+                <div class="card-body text-center">
+                    <i class="fas fa-certificate feature-icon mb-3"></i>
+                    <h4>Earn Certificates</h4>
+                    <p class="text-muted">Get recognized for your achievements with downloadable certificates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

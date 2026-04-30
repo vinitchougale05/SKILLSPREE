@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - Course View{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-play-circle"></i> {{ course.title }}</h4>
+                    <p class="mb-0">
+                        <i class="fas fa-user"></i> {{ course.instructor }}
+                        <span class="mx-2">|</span>
+                        <i class="fas fa-clock"></i> {{ course.duration }}
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="ratio ratio-16x9 mb-4">
+                        <div id="video-container">
+                            <!-- Video player will be inserted here -->
+                            <p class="text-center p-5">Loading video player...</p>
+                        </div>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: 0%"
+                             data-init-progress="{{ course.completion_percentage|default(0) }}"
+                             aria-valuenow="{{ course.completion_percentage|default(0) }}"
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ course.completion_percentage|default(0)|round|int }}%
+                        </div>
+                    </div>
+                    {% if course.completed %}
+                        <div class="alert alert-success text-center">
+                            <i class="fas fa-trophy"></i> Congratulations! You completed this course!
+                            <a href="{{ url_for('certificates') }}" class="btn btn-success btn-sm ms-2">
+                                View Certificate
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Course Videos</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for video in course.videos %}
+                    {% set progress = videos_progress.get(video.url, {}) %}
+                    <a href="#" class="list-group-item list-group-item-action video-item {% if progress.get('completed', False) %}bg-success bg-opacity-10{% endif %}"
+                       data-video-url="{{ video.url }}" data-video-title="{{ video.title }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-play-circle me-2"></i>
+                                {{ video.title }}
+                            </div>
+                            <div class="text-muted">
+                                <small>{{ video.get('duration', '') }}</small>
+                                {% if progress.get('completed', False) %}
+                                <i class="fas fa-check-circle text-success ms-2"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if progress and progress.get('last_position', 0) > 0 and not progress.get('completed', False) %}
+                        <div class="progress mt-2" style="height: 2px;">
+                            <div class="progress-bar bg-info" role="progressbar"
+                                 style="width: 0%"
+                                 data-width="{{ (progress.get('last_position', 0) / video.get('duration', 100) * 100)|round|int }}"></div>
+                        </div>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Topics Covered</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% for topic in course.topics %}
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ topic }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<div id="videos-progress-data" data-json='{{ videos_progress|default({})|tojson }}' data-course-index="{{ course_index }}" hidden></div>
+<script>
+// Load YouTube API
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+// Global variables
+let player;
+let currentVideoId = '';
+let isTracking = false;
+let progressInterval = null;
+let lastUpdateTime = 0;
+let currentDefaultIndex = 0;
+const courseIndex = parseInt(document.getElementById('videos-progress-data')?.getAttribute('data-course-index') || '0', 10);
+// Parse server-provided progress JSON from data attribute
+const videosProgressData = JSON.parse(document.getElementById('videos-progress-data')?.getAttribute('data-json') || '{}');
+
+// Array of default educational videos that allow embedding
+const defaultVideos = [
+    { id: 'PkZNo7MFNFg', title: 'JavaScript Full Course' },
+    { id: 'rfscVS0vtbw', title: 'Python for Beginners' },
+    { id: 'Z1RJmh_OqeA', title: 'Python Crash Course' },
+    { id: 'W6NZfCO5SIk', title: 'JavaScript Tutorial' }
+];
+
+function getYouTubeVideoId(url) {
+    console.log('Processing URL:', url);
+
+    // If no URL provided, use a default educational video
+    if (!url || url.includes('youtube.com/?embeds_referring')) {
+        console.log('Invalid URL, using default video');
+        return 'dQw4w9WgXcQ';  // Default video as fallback
+    }
+
+    try {
+        const urlObj = new URL(url);
+
+        // Handle youtube.com URLs
+        if (urlObj.hostname.includes('youtube.com')) {
+            // Get video ID from v parameter
+            const videoId = urlObj.searchParams.get('v');
+            if (videoId) {
+                console.log('Found video ID:', videoId);
+                return videoId;
+            }
+        }
+        // Handle youtu.be URLs
+        else if (urlObj.hostname === 'youtu.be') {
+            const videoId = urlObj.pathname.slice(1);
+            if (videoId) {
+                console.log('Found video ID from youtu.be:', videoId);
+                return videoId;
+            }
+        }
+    } catch (e) {
+        console.error('Error parsing URL:', e);
+    }
+
+    // If we get here, try to extract from a raw video ID
+    if (url && url.match(/^[a-zA-Z0-9_-]{11}$/)) {
+        console.log('Found raw video ID:', url);
+        return url;
+    }
+
+    console.error('No valid video ID found in URL:', url);
+    return null;
+}
+
+function showVideoError(message) {
+    // Find or create the error container above the video player
+    let errorContainer = document.getElementById('video-error-container');
+    if (!errorContainer) {
+        errorContainer = document.createElement('div');
+        errorContainer.id = 'video-error-container';
+        const videoContainer = document.getElementById('video-container');
+        videoContainer.parentNode.insertBefore(errorContainer, videoContainer);
+    }
+
+    // Show the error message in a dismissible alert
+    errorContainer.innerHTML = `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong><i class="fas fa-exclamation-triangle"></i> Video Unavailable:</strong> ${message}
+            <div class="mt-2 small">Don't worry! We'll load another educational video in 2 seconds...</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    // Auto-dismiss the alert after 5 seconds
+    setTimeout(() => {
+        const alert = errorContainer.querySelector('.alert');
+        if (alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+
+function tryNextVideo() {
+    currentDefaultIndex++;
+    if (currentDefaultIndex < defaultVideos.length) {
+        console.log(`Trying fallback video ${currentDefaultIndex}:`, defaultVideos[currentDefaultIndex].title);
+        return initPlayer(defaultVideos[currentDefaultIndex].id, 0);
+    }
+    showVideoError("Sorry, we couldn't load any of the available videos. Please try another course.");
+    return false;
+}
+
+function initPlayer(videoId, startTime = 0) {
+    console.log('Initializing player with videoId:', videoId);
+    
+    if (!videoId || videoId.length !== 11) {
+        console.log('Invalid video ID, using default');
+        videoId = defaultVideos[0].id;
+    }
+
+    if (player) {
+        console.log('Destroying existing player');
+        player.destroy();
+    }
+
+    currentVideoId = videoId;
+    console.log('Creating new player in video-container');
+    
+    // Clear the container first
+    const container = document.getElementById('video-container');
+    container.innerHTML = '';
+    
+    player = new YT.Player('video-container', {
+        height: '360',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            start: Math.floor(startTime),
+            rel: 0,
+            autoplay: 0,
+            modestbranding: 1,
+            fs: 1
+        },
+        events: {
+            onReady: onPlayerReady,
+            onError: function(event) {
+                console.error('Player error:', event.data);
+                
+                let errorMessage = '';
+                switch(event.data) {
+                    case 2:
+                        errorMessage = 'This video ID is invalid.';
+                        break;
+                    case 5:
+                        errorMessage = 'There was an HTML5 player error.';
+                        break;
+                    case 100:
+                        errorMessage = 'The requested video was not found.';
+                        break;
+                    case 101:
+                    case 150:
+                        errorMessage = 'This video cannot be embedded or has restricted access.';
+                        break;
+                    default:
+                        errorMessage = 'There was an error playing this video.';
+                }
+                
+                console.log(errorMessage);
+                
+                // Show alert with error message and next action
+                alert(`Video Error: ${errorMessage}\n\nLoading alternative educational video in 2 seconds...`);
+                
+                // Wait a moment before trying the next video
+                setTimeout(tryNextVideo, 2000);
+            },
+            onStateChange: onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerStateChange(event) {
+    console.log('Player state changed:', event.data, 'YT.PlayerState.PLAYING:', YT.PlayerState.PLAYING);
+    
+    if (event.data === YT.PlayerState.PLAYING) {
+        console.log('Video started playing');
+        console.log('Duration at play start:', player.getDuration());
+        console.log('Current time at play start:', player.getCurrentTime());
+        startProgressTracking();
+    } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+        console.log('Video paused or ended');
+        stopProgressTracking();
+        updateProgress(event.data === YT.PlayerState.ENDED);
+    }
+}
+
+function onPlayerReady(event) {
+    console.log('Player ready');
+    console.log('Initial duration:', player.getDuration());
+    console.log('Initial current time:', player.getCurrentTime());
+    
+    // Wait a bit for metadata to load, then update progress
+    setTimeout(() => {
+        updateProgress();
+    }, 1000);
+}
+
+function startProgressTracking() {
+    if (!isTracking) {
+        isTracking = true;
+        // Clear any existing interval first
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        progressInterval = setInterval(updateProgress, 5000); // Update every 5 seconds
+    }
+}
+
+function stopProgressTracking() {
+    isTracking = false;
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+}
+
+function updateProgress(completed = false) {
+    if (!player || !currentVideoId) return;
+
+    const currentTime = player.getCurrentTime();
+    const duration = player.getDuration();
+    
+    // Handle invalid duration values
+    if (!duration || duration <= 0 || !isFinite(duration)) {
+        console.log('Invalid duration detected:', duration, '- skipping progress update');
+        return;
+    }
+    
+    // Handle invalid current time values
+    if (!isFinite(currentTime) || currentTime < 0) {
+        console.log('Invalid current time detected:', currentTime, '- skipping progress update');
+        return;
+    }
+    
+    // Debounce: Don't send updates if time hasn't changed significantly (less than 1 second)
+    if (!completed && Math.abs(currentTime - lastUpdateTime) < 1) {
+        return;
+    }
+    
+    lastUpdateTime = currentTime;
+
+    // Calculate expected progress percentage
+    const expectedProgress = (currentTime / duration * 100);
+    
+    // Debug log the values being sent
+    console.log('Progress Update:', {
+        currentTime: currentTime.toFixed(2),
+        duration: duration.toFixed(2),
+        expectedPercentage: expectedProgress.toFixed(2) + '%',
+        completed: completed,
+        ratio: (currentTime / duration).toFixed(4)
+    });
+
+    fetch('/update-video-progress', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            course_index: courseIndex,
+            video_url: `https://youtube.com/watch?v=${currentVideoId}`,
+            current_time: currentTime,
+            duration: duration,
+            completed: completed
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Progress Response:', data);
+        if (data.status === 'success') {
+            // Update progress bar
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                // Ensure progress is reasonable (between 0 and 100)
+                const progressValue = Math.max(0, Math.min(100, data.progress));
+                
+                progressBar.style.width = `${progressValue}%`;
+                progressBar.textContent = `${Math.round(progressValue)}%`;
+                progressBar.setAttribute('aria-valuenow', progressValue);
+                
+                // Log any discrepancy between expected and received progress
+                if (Math.abs(expectedProgress - progressValue) > 5) {
+                    console.warn('Progress discrepancy detected:', {
+                        expected: expectedProgress.toFixed(2) + '%',
+                        received: progressValue.toFixed(2) + '%',
+                        difference: (progressValue - expectedProgress).toFixed(2) + '%'
+                    });
+                }
+            }
+
+            if (data.completed && data.certificate) {
+                alert('Congratulations! You have completed the course. Your certificate is ready!');
+                window.location.href = `/certificates`;
+            }
+        } else {
+            console.error('Progress update failed:', data);
+        }
+    })
+    .catch(error => console.error('Error updating progress:', error));
+}
+
+// videosProgressData is already parsed above from data attribute
+
+// Attach click listeners after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize main progress bar width from data attribute
+    const mainProgressBar = document.querySelector('.progress-bar.bg-success[data-init-progress]');
+    if (mainProgressBar) {
+        const initVal = parseFloat(mainProgressBar.getAttribute('data-init-progress') || '0');
+        const clamped = Math.max(0, Math.min(100, initVal));
+        mainProgressBar.style.width = `${clamped}%`;
+        mainProgressBar.setAttribute('aria-valuenow', clamped);
+    }
+
+    // Initialize list item mini progress bars
+    document.querySelectorAll('.progress .progress-bar.bg-info[data-width]')
+        .forEach(bar => {
+            const val = parseFloat(bar.getAttribute('data-width') || '0');
+            const clamped = Math.max(0, Math.min(100, val));
+            bar.style.width = `${clamped}%`;
+        });
+
+    document.querySelectorAll('.video-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = item.dataset.videoUrl;
+            const videoId = getYouTubeVideoId(url);
+            if (videoId) {
+                const videoProgress = videosProgressData[url] || {};
+                const lastPosition = videoProgress.last_position || 0;
+                initPlayer(videoId, lastPosition);
+            }
+        });
+    });
+});
+
+// Load the first video by default when YouTube API is ready
+window.onYouTubeIframeAPIReady = function() {
+    const firstVideo = document.querySelector('.video-item');
+    if (firstVideo) {
+        const url = firstVideo.dataset.videoUrl;
+        const videoId = getYouTubeVideoId(url);
+        if (videoId) {
+            const videoProgress = videosProgressData[url] || {};
+            const lastPosition = videoProgress.last_position || 0;
+            initPlayer(videoId, lastPosition);
+        }
+    }
+};
+</script>
+{% endblock %}

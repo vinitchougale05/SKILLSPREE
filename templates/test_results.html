@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-clipboard-list"></i> Assessment Test Results</h2>
+            <p class="text-muted">View your past assessment results and track your progress over time.</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-history"></i> Recent Assessments</h5>
+                </div>
+                <div class="card-body">
+                    {% if quiz_history or file_results %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Learning Goal</th>
+                                        <th>Score</th>
+                                        <th>Percentage</th>
+                                        <th>Level</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for quiz in quiz_history %}
+                                    <tr>
+                                        <td>{{ quiz.date.strftime('%b %d, %Y at %I:%M %p') if quiz.get('date') else 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ quiz.get('learning_goal', 'Not specified') }}</span>
+                                        </td>
+                                        <td>{{ quiz.score }}/{{ quiz.total }}</td>
+                                        <td>
+                                            <div class="progress" style="width: 100px;">
+                                                <div class="progress-bar 
+                                                    {% if quiz.percentage >= 80 %}bg-success
+                                                    {% elif quiz.percentage >= 60 %}bg-warning
+                                                    {% else %}bg-info
+                                                    {% endif %}" 
+                                                    style="width: {{ quiz.percentage }}%">
+                                                    {{ quiz.percentage|round(1) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% set level_class = 'success' if quiz.level == 'Advanced' else ('warning' if quiz.level == 'Intermediate' else 'info') %}
+                                            <span class="badge bg-{{ level_class }}">{{ quiz.level }}</span>
+                                        </td>
+                                        <td>
+                                            {% if quiz.get('detailed_results') %}
+                                            <button class="btn btn-sm btn-primary view-details-btn" 
+                                                    data-quiz-index="{{ loop.index0 }}">
+                                                <i class="fas fa-eye"></i> View Details
+                                            </button>
+                                            {% else %}
+                                            <span class="text-muted small">No details available</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if file_results %}
+                        <hr>
+                        <h6 class="mt-4"><i class="fas fa-file-alt"></i> Saved Test Result Files</h6>
+                        <div class="list-group mt-3">
+                            {% for file in file_results %}
+                            <a href="{{ url_for('view_test_result', filename=file.filename) }}" 
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-file-alt text-primary"></i>
+                                    <strong>{{ file.filename }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar"></i> {{ file.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                        • {{ (file.size / 1024)|round(1) }} KB
+                                    </small>
+                                </div>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-4x text-muted mb-3"></i>
+                            <h4>No Test Results Yet</h4>
+                            <p class="text-muted">Take an assessment to see your results here.</p>
+                            <a href="{{ url_for('assessment') }}" class="btn btn-primary mt-3">
+                                <i class="fas fa-pencil-alt"></i> Take Assessment
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-clipboard-check"></i> Assessment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quizHistory = {{ quiz_history_json|tojson }};
+    
+    document.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const quizIndex = parseInt(this.getAttribute('data-quiz-index'));
+            const quiz = quizHistory[quizIndex];
+            
+            if (!quiz || !quiz.detailed_results) {
+                alert('No detailed results available');
+                return;
+            }
+            
+            // Format date properly
+            const dateStr = quiz.date ? new Date(quiz.date).toLocaleString() : 'Unknown';
+            
+            let html = `
+                <div class="mb-3">
+                    <h6>Assessment Date: ${dateStr}</h6>
+                    <p><strong>Learning Goal:</strong> ${quiz.learning_goal || 'Not specified'}</p>
+                    <p><strong>Score:</strong> ${quiz.score}/${quiz.total} (${quiz.percentage.toFixed(1)}%)</p>
+                    <p><strong>Level:</strong> <span class="badge bg-info">${quiz.level}</span></p>
+                </div>
+                <hr>
+            `;
+            
+            quiz.detailed_results.forEach((result, i) => {
+                const isCorrect = result.is_correct;
+                const borderClass = isCorrect ? 'border-success' : 'border-danger';
+                const headerClass = isCorrect ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10';
+                
+                html += `
+                    <div class="card mb-3 ${borderClass}">
+                        <div class="card-header ${headerClass}">
+                            <strong>Question ${i + 1}</strong>
+                            ${result.difficulty ? `<span class="badge bg-secondary ms-2">${result.difficulty}</span>` : ''}
+                            ${isCorrect ? '<span class="badge bg-success float-end"><i class="fas fa-check"></i> Correct</span>' : '<span class="badge bg-danger float-end"><i class="fas fa-times"></i> Incorrect</span>'}
+                        </div>
+                        <div class="card-body">
+                            <p class="fw-bold">${result.question}</p>
+                            ${result.options.map((option, j) => {
+                                let optionClass = 'bg-light';
+                                let icon = '';
+                                if (j === result.correct_answer && j === result.user_answer) {
+                                    optionClass = 'bg-success text-white';
+                                    icon = '<i class="fas fa-check-circle float-end"></i>';
+                                } else if (j === result.user_answer) {
+                                    optionClass = 'bg-danger text-white';
+                                    icon = '<i class="fas fa-times-circle float-end"></i>';
+                                } else if (j === result.correct_answer) {
+                                    optionClass = 'bg-success bg-opacity-25 border border-success';
+                                    icon = '<i class="fas fa-check-circle float-end text-success"></i>';
+                                }
+                                return `<div class="p-2 rounded mb-2 ${optionClass}">
+                                    <strong>${String.fromCharCode(65 + j)}.</strong> ${option} ${icon}
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('modalContent').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-shield-alt"></i> Admin Dashboard</h2>
+            <p class="text-muted">Platform Management & Analytics</p>
+        </div>
+    </div>
+
+    <!-- Admin Stats Grid -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h2>{{ total_users }}</h2>
+                    <p class="mb-0">Total Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body text-center">
+                    <i class="fas fa-graduation-cap fa-3x mb-3"></i>
+                    <h2>{{ total_enrollments }}</h2>
+                    <p class="mb-0">Total Enrollments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h2>{{ total_completions }}</h2>
+                    <p class="mb-0">Course Completions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="card-body text-center">
+                    <i class="fas fa-certificate fa-3x mb-3"></i>
+                    <h2>{{ total_certificates }}</h2>
+                    <p class="mb-0">Certificates Issued</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-clipboard-list fa-2x text-primary mb-2"></i>
+                    <h3>{{ total_assessments }}</h3>
+                    <p class="mb-0 text-muted">Assessments Taken</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-shield fa-2x text-success mb-2"></i>
+                    <h3>{{ total_admins }}</h3>
+                    <p class="mb-0 text-muted">Administrators</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x text-warning mb-2"></i>
+                    <h3>{{ ((total_completions / total_enrollments * 100) if total_enrollments > 0 else 0)|round(1) }}%</h3>
+                    <p class="mb-0 text-muted">Completion Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-bolt"></i> Management Tools</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-primary btn-block w-100">
+                                <i class="fas fa-users"></i> Manage Users
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_test_results') }}" class="btn btn-success btn-block w-100">
+                                <i class="fas fa-clipboard-list"></i> View All Tests
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('admin_certificates') }}" class="btn btn-warning btn-block w-100">
+                                <i class="fas fa-certificate"></i> All Certificates
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-info btn-block w-100" onclick="alert('Feature coming soon!')">
+                                <i class="fas fa-cog"></i> System Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Learning Goal Distribution -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-chart-pie"></i> Learning Goal Distribution</h5>
+                </div>
+                <div class="card-body">
+                    {% if goal_distribution %}
+                        <div class="list-group">
+                            {% for goal, count in goal_distribution.items() %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ goal }}
+                                <span class="badge bg-primary rounded-pill">{{ count }} students</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Assessments -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-history"></i> Recent Assessments</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if recent_assessments %}
+                        <div class="list-group">
+                            {% for assessment in recent_assessments %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ assessment.user_name }}</h6>
+                                    <small>{{ assessment.date.strftime('%b %d, %I:%M %p') if assessment.date else 'N/A' }}</small>
+                                </div>
+                                <p class="mb-1">
+                                    <span class="badge bg-info">{{ assessment.learning_goal }}</span>
+                                    <span class="badge bg-{{ 'success' if assessment.percentage >= 80 else ('warning' if assessment.percentage >= 60 else 'secondary') }}">
+                                        {{ assessment.level }}
+                                    </span>
+                                </p>
+                                <small class="text-muted">
+                                    Score: {{ assessment.score }}/{{ assessment.total }} ({{ assessment.percentage|round(1) }}%)
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No assessments yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-user-plus"></i> Recent User Registrations</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Learning Goal</th>
+                                        <th>Skill Level</th>
+                                        <th>Enrolled Courses</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in recent_users %}
+                                    <tr>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            {% if user.learning_goal %}
+                                                <span class="badge bg-info">{{ user.learning_goal }}</span>
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ user.skill_level|round(1) }}%</td>
+                                        <td>{{ user.courses|length if user.courses else 0 }}</td>
+                                        <td>{{ user.created_at.strftime('%b %d, %Y') if user.created_at else 'N/A' }}</td>
+                                        <td>
+                                            <a href="{{ url_for('admin_users') }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No users registered yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

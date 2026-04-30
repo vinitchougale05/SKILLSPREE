@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Results - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white text-center">
+                    <h4><i class="fas fa-chart-line"></i> Your Results</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <h2 class="text-success">{{ quiz_result.percentage }}%</h2>
+                        <p class="text-muted">Score: {{ quiz_result.score }}/{{ quiz_result.total }}</p>
+                    </div>
+                    <div class="mb-3">
+                        {% set level_class = 'success' if quiz_result.level == 'Advanced' else ('warning' if quiz_result.level == 'Intermediate' else 'info') %}
+                        <h4 class="badge bg-{{ level_class }} fs-6">
+                            {{ quiz_result.level }} Level
+                        </h4>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" data-width="{{ quiz_result.percentage }}"></div>
+                    </div>
+                    <p class="text-muted">Great job! Based on your assessment, we've customized your learning path.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-lightbulb"></i> Recommended Courses</h4>
+                </div>
+                <div class="card-body">
+                    {% for course in recommended_courses %}
+                    {% set course_index = loop.index0 %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ course.title }}</h6>
+                            <p class="card-text text-muted">
+                                <span class="badge bg-secondary">{{ course.platform }}</span>
+                                {{ course.instructor }} • {{ course.duration }}
+                            </p>
+                            <p class="small text-muted mb-2">Key topics: {{ course.topics|join(", ") }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('view_course_recommended', course_index=course_index) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-play-circle"></i> Start Learning
+                                </a>
+                                {% if course.url in bookmarked_urls %}
+                                <button class="btn btn-sm btn-secondary" disabled>
+                                    <i class="fas fa-bookmark"></i> Bookmarked
+                                </button>
+                                {% else %}
+                                <button class="btn btn-sm btn-outline-warning bookmark-btn"
+                                        data-course-title="{{ course.title }}"
+                                        data-course-instructor="{{ course.instructor or 'Expert Instructor' }}"
+                                        data-course-url="{{ course.url }}"
+                                        data-course-duration="{{ course.duration or '' }}"
+                                        data-course-description="{{ course.description or '' }}"
+                                        data-course-topics="{{ course.topics|join(',') if course.topics else '' }}">
+                                    <i class="far fa-bookmark"></i> Bookmark
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Answer Review Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4><i class="fas fa-clipboard-check"></i> Answer Review - Your Responses vs Correct Answers</h4>
+                </div>
+                <div class="card-body">
+                    {% if quiz_result.detailed_results %}
+                        {% for result in quiz_result.detailed_results %}
+                        <div class="card mb-3 {% if result.is_correct %}border-success{% else %}border-danger{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center {% if result.is_correct %}bg-success bg-opacity-10{% else %}bg-danger bg-opacity-10{% endif %}">
+                                <div>
+                                    <strong>Question {{ loop.index }}</strong>
+                                    {% if result.difficulty %}
+                                        {% if result.difficulty == 'easy' %}
+                                            <span class="badge bg-success ms-2">Easy</span>
+                                        {% elif result.difficulty == 'medium' %}
+                                            <span class="badge bg-warning text-dark ms-2">Medium</span>
+                                        {% elif result.difficulty == 'hard' %}
+                                            <span class="badge bg-danger ms-2">Hard</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if result.is_correct %}
+                                        <span class="badge bg-success"><i class="fas fa-check"></i> Correct</span>
+                                    {% else %}
+                                        <span class="badge bg-danger"><i class="fas fa-times"></i> Incorrect</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="fw-bold mb-3">{{ result.question }}</p>
+                                <div class="row">
+                                    {% for option in result.options %}
+                                    {% set option_index = loop.index0 %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="p-2 rounded 
+                                            {% if option_index == result.correct_answer and option_index == result.user_answer %}
+                                                bg-success text-white
+                                            {% elif option_index == result.user_answer %}
+                                                bg-danger text-white
+                                            {% elif option_index == result.correct_answer %}
+                                                bg-success bg-opacity-25 border border-success
+                                            {% else %}
+                                                bg-light
+                                            {% endif %}">
+                                            <strong>{{ 'ABCD'[option_index] }}.</strong> {{ option }}
+                                            {% if option_index == result.correct_answer and option_index == result.user_answer %}
+                                                <i class="fas fa-check-circle float-end"></i>
+                                            {% elif option_index == result.user_answer %}
+                                                <i class="fas fa-times-circle float-end"></i>
+                                            {% elif option_index == result.correct_answer %}
+                                                <i class="fas fa-check-circle float-end text-success"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% if not result.is_correct %}
+                                <div class="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                                    <small>
+                                        <i class="fas fa-info-circle text-info"></i> 
+                                        <strong>Your answer:</strong> {{ result.options[result.user_answer] if result.user_answer >= 0 else 'No answer provided' }}
+                                        <br>
+                                        <i class="fas fa-check-circle text-success"></i> 
+                                        <strong>Correct answer:</strong> {{ result.options[result.correct_answer] }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No detailed results available for this assessment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize progress bar width without inline style
+    document.querySelectorAll('.progress .progress-bar.bg-success[data-width]')
+        .forEach(bar => {
+            const val = parseFloat(bar.getAttribute('data-width') || '0');
+            const clamped = Math.max(0, Math.min(100, val));
+            bar.style.width = `${clamped}%`;
+        });
+
+    // Wire up bookmark buttons without inline onclick
+    document.querySelectorAll('.bookmark-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const courseData = {
+                title: btn.getAttribute('data-course-title'),
+                instructor: btn.getAttribute('data-course-instructor'),
+                url: btn.getAttribute('data-course-url'),
+                duration: btn.getAttribute('data-course-duration'),
+                description: btn.getAttribute('data-course-description'),
+                topics: btn.getAttribute('data-course-topics') ? btn.getAttribute('data-course-topics').split(',') : []
+            };
+            bookmarkCourse(courseData, btn);
+        });
+    });
+});
+
+// Function to bookmark a course
+function bookmarkCourse(courseData, buttonElement) {
+    fetch('/bookmark-course', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update button state
+            buttonElement.innerHTML = '<i class="fas fa-bookmark"></i> Bookmarked';
+            buttonElement.classList.remove('btn-outline-warning', 'bookmark-btn');
+            buttonElement.classList.add('btn-secondary');
+            buttonElement.disabled = true;
+        } else {
+            alert(data.message || 'Error bookmarking course');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error bookmarking course. Please try again.');
+    });
+}
+</script>
+{% endblock %}

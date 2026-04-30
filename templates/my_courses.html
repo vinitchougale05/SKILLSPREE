@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+
+{% block title %}My Courses - Personalized Education Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-book"></i> My Courses</h2>
+            <p class="text-muted">Manage all your enrolled courses in one place</p>
+        </div>
+    </div>
+
+    <!-- Course Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-stat h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-book fa-2x mb-2"></i>
+                    <h3>{{ total_courses }}</h3>
+                    <p class="mb-0">Total Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body text-center">
+                    <i class="fas fa-spinner fa-2x mb-2"></i>
+                    <h3>{{ ongoing_courses }}</h3>
+                    <p class="mb-0">In Progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h3>{{ completed_courses }}</h3>
+                    <p class="mb-0">Completed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" id="coursesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
+                <i class="fas fa-list"></i> All Courses ({{ total_courses }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ongoing-tab" data-bs-toggle="tab" data-bs-target="#ongoing" type="button" role="tab">
+                <i class="fas fa-spinner"></i> In Progress ({{ ongoing_courses }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                <i class="fas fa-trophy"></i> Completed ({{ completed_courses }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="bookmarked-tab" data-bs-toggle="tab" data-bs-target="#bookmarked" type="button" role="tab">
+                <i class="fas fa-bookmark"></i> Bookmarked ({{ bookmarks_count }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="coursesTabContent">
+        <!-- All Courses Tab -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            {% if courses %}
+                <div class="row">
+                    {% for course in courses %}
+                    {% set i = loop.index0 %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 {% if course.completed %}border-success{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">{{ course.title }}</h5>
+                                    {% if course.completed %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-trophy"></i> Completed
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-spinner"></i> In Progress
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-tie"></i> {{ course.instructor or 'Expert Instructor' }}
+                                    </small>
+                                </p>
+                                {% if course.duration %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ course.duration }}
+                                    </small>
+                                </p>
+                                {% endif %}
+                                <div class="progress mb-2" style="height: 25px;">
+                                    <div class="progress-bar {% if course.completed %}bg-success{% else %}bg-primary{% endif %}" 
+                                         role="progressbar" 
+                                         data-width="{{ course.completion_percentage }}"
+                                         aria-valuenow="{{ course.completion_percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ course.completion_percentage|round|int }}%
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Enrolled: {{ course.enrolled_date.strftime('%b %d, %Y') if course.enrolled_date else 'N/A' }}
+                                    </small>
+                                </p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <a href="{{ url_for('view_course', course_index=i) }}" class="btn btn-sm btn-primary flex-grow-1">
+                                        <i class="fas fa-play"></i> {% if course.completed %}Review{% else %}Continue{% endif %}
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger remove-course-btn" 
+                                            data-course-index="{{ i }}" 
+                                            data-course-title="{{ course.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+                    <h4>No courses enrolled yet</h4>
+                    <p class="text-muted">Complete your assessment to get personalized course recommendations</p>
+                    <a href="{{ url_for('assessment') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-brain"></i> Take Assessment
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Ongoing Courses Tab -->
+        <div class="tab-pane fade" id="ongoing" role="tabpanel">
+            {% set ongoing = courses | selectattr('completed', 'equalto', False) | list %}
+            {% if ongoing %}
+                <div class="row">
+                    {% for course in ongoing %}
+                    {% set i = loop.index0 %}
+                    {% set original_index = courses.index(course) %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">{{ course.title }}</h5>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-spinner"></i> In Progress
+                                    </span>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-tie"></i> {{ course.instructor or 'Expert Instructor' }}
+                                    </small>
+                                </p>
+                                {% if course.duration %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ course.duration }}
+                                    </small>
+                                </p>
+                                {% endif %}
+                                <div class="progress mb-2" style="height: 25px;">
+                                    <div class="progress-bar bg-primary" 
+                                         role="progressbar" 
+                                         data-width="{{ course.completion_percentage }}"
+                                         aria-valuenow="{{ course.completion_percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ course.completion_percentage|round|int }}%
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Enrolled: {{ course.enrolled_date.strftime('%b %d, %Y') if course.enrolled_date else 'N/A' }}
+                                    </small>
+                                </p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <a href="{{ url_for('view_course', course_index=original_index) }}" class="btn btn-sm btn-primary flex-grow-1">
+                                        <i class="fas fa-play"></i> Continue Learning
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger remove-course-btn" 
+                                            data-course-index="{{ original_index }}" 
+                                            data-course-title="{{ course.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-clipboard-check fa-4x text-muted mb-3"></i>
+                    <h4>No ongoing courses</h4>
+                    <p class="text-muted">All your enrolled courses are completed!</p>
+                    {% if has_assessment_history %}
+                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#recommendationModal">
+                        <i class="fas fa-brain"></i> Get New Recommendations
+                    </button>
+                    {% else %}
+                    <a href="{{ url_for('assessment') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-brain"></i> Get New Recommendations
+                    </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Completed Courses Tab -->
+        <div class="tab-pane fade" id="completed" role="tabpanel">
+            {% set completed = courses | selectattr('completed', 'equalto', True) | list %}
+            {% if completed %}
+                <div class="row">
+                    {% for course in completed %}
+                    {% set i = loop.index0 %}
+                    {% set original_index = courses.index(course) %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 border-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">{{ course.title }}</h5>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-trophy"></i> Completed
+                                    </span>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-tie"></i> {{ course.instructor or 'Expert Instructor' }}
+                                    </small>
+                                </p>
+                                {% if course.duration %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ course.duration }}
+                                    </small>
+                                </p>
+                                {% endif %}
+                                <div class="progress mb-2" style="height: 25px;">
+                                    <div class="progress-bar bg-success" 
+                                         role="progressbar" 
+                                         style="width: 100%"
+                                         aria-valuenow="100" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        100%
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle"></i> Completed: {{ course.completion_date.strftime('%b %d, %Y') if course.get('completion_date') else 'Recently' }}
+                                    </small>
+                                </p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <a href="{{ url_for('view_course', course_index=original_index) }}" class="btn btn-sm btn-success flex-grow-1">
+                                        <i class="fas fa-redo"></i> Review Course
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger remove-course-btn" 
+                                            data-course-index="{{ original_index }}" 
+                                            data-course-title="{{ course.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
+                    <h4>No completed courses yet</h4>
+                    <p class="text-muted">Keep learning to earn certificates!</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Bookmarked Courses Tab -->
+        <div class="tab-pane fade" id="bookmarked" role="tabpanel" aria-labelledby="bookmarked-tab">
+            {% if bookmarked_courses %}
+                <div class="row">
+                    {% for course in bookmarked_courses %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm border-warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">{{ course.title }}</h5>
+                                    <i class="fas fa-bookmark text-warning ms-2"></i>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> {{ course.instructor }}
+                                    </small>
+                                </p>
+                                {% if course.duration %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ course.duration }}
+                                    </small>
+                                </p>
+                                {% endif %}
+                                {% if course.topics %}
+                                <div class="mb-2">
+                                    {% for topic in course.topics[:3] %}
+                                    <span class="badge bg-info me-1">{{ topic }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% if course.description %}
+                                <p class="card-text small text-muted">
+                                    {{ course.description[:100] }}{% if course.description|length > 100 %}...{% endif %}
+                                </p>
+                                {% endif %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Saved: {{ course.bookmarked_date.strftime('%b %d, %Y') if course.get('bookmarked_date') else 'Recently' }}
+                                    </small>
+                                </p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary flex-grow-1 enroll-bookmark-btn" 
+                                            data-course-title="{{ course.title }}"
+                                            data-course-instructor="{{ course.instructor }}"
+                                            data-course-url="{{ course.url }}"
+                                            data-course-duration="{{ course.duration or '' }}"
+                                            data-course-description="{{ course.description or '' }}"
+                                            data-course-topics="{{ course.topics|join(',') if course.topics else '' }}">
+                                        <i class="fas fa-play"></i> Start Learning
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger remove-bookmark-btn" 
+                                            data-course-url="{{ course.url }}" 
+                                            data-course-title="{{ course.title }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="far fa-bookmark fa-4x text-muted mb-3"></i>
+                    <h4>No bookmarked courses yet</h4>
+                    <p class="text-muted">Bookmark courses you want to watch later!</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-search"></i> Discover Courses
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Recommendation Choice Modal -->
+<div class="modal fade" id="recommendationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Get New Recommendations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>How would you like to generate new course recommendations?</p>
+                <div class="d-grid gap-3">
+                    <a href="{{ url_for('regenerate_recommendations') }}" class="btn btn-success">
+                        <i class="fas fa-sync-alt me-2"></i> Generate from Previous Results
+                        <div class="small text-white-50">Use your last assessment score to find new courses</div>
+                    </a>
+                    <a href="{{ url_for('assessment') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-clipboard-list me-2"></i> Retake Assessment
+                        <div class="small text-muted">Update your skill level with a new quiz</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Wire up remove course buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply widths to progress bars without inline style
+    document.querySelectorAll('.progress .progress-bar[data-width]')
+        .forEach(bar => {
+            const val = parseFloat(bar.getAttribute('data-width') || '0');
+            const clamped = Math.max(0, Math.min(100, val));
+            bar.style.width = `${clamped}%`;
+        });
+
+    // Wire up remove course buttons
+    document.querySelectorAll('.remove-course-btn[data-course-index]')
+        .forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.getAttribute('data-course-index') || '0', 10);
+                const title = btn.getAttribute('data-course-title') || 'this course';
+                removeCourse(idx, title);
+            });
+        });
+
+    // Wire up remove bookmark buttons
+    document.querySelectorAll('.remove-bookmark-btn[data-course-url]')
+        .forEach(btn => {
+            btn.addEventListener('click', () => {
+                const url = btn.getAttribute('data-course-url') || '';
+                const title = btn.getAttribute('data-course-title') || 'this course';
+                removeBookmark(url, title);
+            });
+        });
+
+    // Wire up enroll from bookmark buttons
+    document.querySelectorAll('.enroll-bookmark-btn')
+        .forEach(btn => {
+            btn.addEventListener('click', () => {
+                const courseData = {
+                    title: btn.getAttribute('data-course-title'),
+                    instructor: btn.getAttribute('data-course-instructor'),
+                    url: btn.getAttribute('data-course-url'),
+                    duration: btn.getAttribute('data-course-duration'),
+                    description: btn.getAttribute('data-course-description'),
+                    topics: btn.getAttribute('data-course-topics') ? btn.getAttribute('data-course-topics').split(',') : []
+                };
+                enrollFromBookmark(courseData);
+            });
+        });
+});
+
+// Function to remove a course from enrolled courses
+function removeCourse(courseIndex, courseTitle) {
+    if (confirm(`Are you sure you want to remove "${courseTitle}" from your courses?\n\nThis will delete all your progress and cannot be undone.`)) {
+        fetch('/api/remove-course', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ course_index: courseIndex })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message and reload
+                alert(`"${courseTitle}" has been removed from your courses.`);
+                location.reload();
+            } else {
+                alert('Error removing course: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing course. Please try again.');
+        });
+    }
+}
+
+// Function to remove a bookmark
+function removeBookmark(courseUrl, courseTitle) {
+    if (confirm(`Remove "${courseTitle}" from bookmarks?`)) {
+        fetch('/remove-bookmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: courseUrl })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(`"${courseTitle}" has been removed from bookmarks.`);
+                location.reload();
+            } else {
+                alert('Error removing bookmark: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing bookmark. Please try again.');
+        });
+    }
+}
+
+// Function to enroll in a bookmarked course
+function enrollFromBookmark(courseData) {
+    // Add the course to recommended courses in session, then redirect to view it
+    fetch('/api/enroll-from-bookmark', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Redirect to the newly enrolled course
+            window.location.href = `/course/${data.course_index}`;
+        } else {
+            alert('Error enrolling in course: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error enrolling in course. Please try again.');
+    });
+}
+</script>
+{% endblock %}
