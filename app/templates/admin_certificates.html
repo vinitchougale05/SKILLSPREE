@@ -8,7 +8,7 @@
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.admin_dashboard') }}">Admin Dashboard</a></li>
                     <li class="breadcrumb-item active">All Certificates</li>
                 </ol>
             </nav>
@@ -128,7 +128,7 @@
                                         <td>{{ cert.course_title }}</td>
                                         <td>{{ cert.issued_date_formatted }}</td>
                                         <td>
-                                            <a href="{{ url_for('admin_view_certificate', user_id=cert.user_id, certificate_id=cert.certificate_id) }}" 
+                                            <a href="{{ url_for('main.admin_view_certificate', user_id=cert.user_id, certificate_id=cert.certificate_id) }}" 
                                                class="btn btn-sm btn-success" 
                                                target="_blank"
                                                title="View Certificate PDF">

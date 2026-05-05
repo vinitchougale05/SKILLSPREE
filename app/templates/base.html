@@ -112,7 +112,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="fas fa-graduation-cap"></i> SkillSpree
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -123,55 +123,55 @@
                     {% if session.user_id %}
                         {% if session.is_admin %}
                             {# Admin Navigation #}
-                            <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <a class="nav-link" href="{{ url_for('main.admin_dashboard') }}">
                                 <i class="fas fa-tachometer-alt"></i> Admin Dashboard
                             </a>
-                            <a class="nav-link" href="{{ url_for('admin_users') }}">
+                            <a class="nav-link" href="{{ url_for('main.admin_users') }}">
                                 <i class="fas fa-users"></i> Manage Users
                             </a>
-                            <a class="nav-link" href="{{ url_for('admin_test_results') }}">
+                            <a class="nav-link" href="{{ url_for('main.admin_test_results') }}">
                                 <i class="fas fa-clipboard-list"></i> All Test Results
                             </a>
-                            <a class="nav-link" href="{{ url_for('admin_certificates') }}">
+                            <a class="nav-link" href="{{ url_for('main.admin_certificates') }}">
                                 <i class="fas fa-certificate"></i> All Certificates
                             </a>
-                            <a class="nav-link" href="{{ url_for('profile') }}">
+                            <a class="nav-link" href="{{ url_for('main.profile') }}">
                                 <i class="fas fa-user"></i> Profile
                             </a>
-                            <a class="nav-link" href="{{ url_for('logout') }}">
+                            <a class="nav-link" href="{{ url_for('main.logout') }}">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
                         {% else %}
                             {# Student Navigation #}
-                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
-                            <a class="nav-link" href="{{ url_for('my_courses') }}">
+                            <a class="nav-link" href="{{ url_for('main.my_courses') }}">
                                 <i class="fas fa-book"></i> My Courses
                             </a>
                             {% if not admin_exists %}
-                            <a class="nav-link" href="{{ url_for('make_me_admin') }}">
+                            <a class="nav-link" href="{{ url_for('main.make_me_admin') }}">
                                 <i class="fas fa-crown"></i> Admin Setup
                             </a>
                             {% endif %}
-                            <a class="nav-link" href="{{ url_for('certificates') }}">
+                            <a class="nav-link" href="{{ url_for('main.certificates') }}">
                                 <i class="fas fa-certificate"></i> Certificates
                             </a>
-                            <a class="nav-link" href="{{ url_for('test_results') }}">
+                            <a class="nav-link" href="{{ url_for('main.test_results') }}">
                                 <i class="fas fa-clipboard-list"></i> Test Results
                             </a>
-                            <a class="nav-link" href="{{ url_for('profile') }}">
+                            <a class="nav-link" href="{{ url_for('main.profile') }}">
                                 <i class="fas fa-user"></i> Profile
                             </a>
-                            <a class="nav-link" href="{{ url_for('logout') }}">
+                            <a class="nav-link" href="{{ url_for('main.logout') }}">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
                         {% endif %}
                     {% else %}
-                        <a class="nav-link" href="{{ url_for('login') }}">
+                        <a class="nav-link" href="{{ url_for('main.login') }}">
                             <i class="fas fa-sign-in-alt"></i> Login
                         </a>
-                        <a class="nav-link" href="{{ url_for('register') }}">
+                        <a class="nav-link" href="{{ url_for('main.register') }}">
                             <i class="fas fa-user-plus"></i> Register
                         </a>
                     {% endif %}

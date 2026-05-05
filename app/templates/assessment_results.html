@@ -46,7 +46,7 @@
                             </p>
                             <p class="small text-muted mb-2">Key topics: {{ course.topics|join(", ") }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ url_for('view_course_recommended', course_index=course_index) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ url_for('main.view_course_recommended', course_index=course_index) }}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-play-circle"></i> Start Learning
                                 </a>
                                 {% if course.url in bookmarked_urls %}
@@ -156,7 +156,7 @@
     </div>
 
     <div class="text-center mt-4">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">
             <i class="fas fa-tachometer-alt"></i> Go to Dashboard
         </a>
     </div>

@@ -8,14 +8,14 @@
         </h1>
         <p class="lead mb-5">Discover personalized courses, track your progress, and earn certificates in your chosen field</p>
         {% if not session.user_id %}
-            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">
+            <a href="{{ url_for('main.register') }}" class="btn btn-light btn-lg me-3">
                 <i class="fas fa-user-plus"></i> Get Started
             </a>
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+            <a href="{{ url_for('main.login') }}" class="btn btn-outline-light btn-lg">
                 <i class="fas fa-sign-in-alt"></i> Login
             </a>
         {% else %}
-            <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-light btn-lg">
                 <i class="fas fa-tachometer-alt"></i> Go to Dashboard
             </a>
         {% endif %}
