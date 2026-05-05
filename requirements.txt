@@ -1,8 +1,9 @@
-# All work well with Python 3.8-3.11
-Flask>=2.0.0
-flask-pymongo>=2.3.0
-bcrypt>=3.2.0
-reportlab>=3.6.0
-pymongo>=4.0.0
-flask
-gunicorn
+Flask==3.0.3
+Flask-PyMongo==3.0.1
+pymongo==4.7.0
+bcrypt==4.1.3
+google-generativeai==0.5.4
+google-api-python-client==2.136.0
+python-dotenv==1.0.1
+gunicorn==22.0.0
+reportlab==4.2.0
