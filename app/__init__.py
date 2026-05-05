@@ -10,7 +10,10 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # Initialize extensions with app
-    mongo.init_app(app)
+    try:
+        mongo.init_app(app)
+    except Exception as e:
+        print(f"WARNING: Failed to initialize MongoDB: {e}")
 
     # Register blueprints
     from app.main import main as main_blueprint
