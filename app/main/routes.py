@@ -226,6 +226,11 @@ def parse_assessment_file(content):
             
     return result
 
+@main.app_errorhandler(500)
+def internal_error(error):
+    import traceback
+    return f"<h1>500 Internal Server Error</h1><pre>{traceback.format_exc()}</pre><br>Original error: {error}", 500
+
 @main.route('/')
 def index():
     return render_template('index.html')
