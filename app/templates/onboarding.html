@@ -18,7 +18,7 @@
                             <div class="col-md-6 mb-3">
                                 <div class="card goal-card h-100" style="cursor: pointer;" onclick="selectGoal('{{ goal }}')">
                                     <div class="card-body text-center">
-                                        <i class="fas fa-{% if 'Java' in goal %}coffee{% elif 'Python' in goal %}snake{% elif 'Web' in goal %}globe{% elif 'Data' in goal %}chart-bar{% elif 'Mobile' in goal %}mobile-alt{% elif 'DevOps' in goal %}cogs{% else %}code{% endif %} fa-3x text-primary mb-3"></i>
+                                        <i class="{% if 'Python' in goal %}fab fa-python{% else %}fas fa-{% if 'Java' in goal %}coffee{% elif 'Web' in goal %}globe{% elif 'Data' in goal %}chart-bar{% elif 'Mobile' in goal %}mobile-alt{% elif 'DevOps' in goal %}cogs{% else %}code{% endif %}{% endif %} fa-3x text-primary mb-3"></i>
                                         <h5>{{ goal }}</h5>
                                         <input type="radio" name="learning_goal" value="{{ goal }}" id="goal_{{ loop.index }}" style="display: none;">
                                     </div>

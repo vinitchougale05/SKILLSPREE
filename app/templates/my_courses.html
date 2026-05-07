@@ -5,9 +5,14 @@
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="row mb-4">
-        <div class="col-12">
-            <h2><i class="fas fa-book"></i> My Courses</h2>
-            <p class="text-muted">Manage all your enrolled courses in one place</p>
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1"><i class="fas fa-book"></i> My Courses</h2>
+                <p class="text-muted mb-0">Manage all your enrolled courses in one place</p>
+            </div>
+            <a href="{{ url_for('main.onboarding') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Change Learning Goal
+            </a>
         </div>
     </div>
 
